@@ -1,0 +1,231 @@
+{% load static %}
+<html>
+<head>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-image: url("{% static 'images/bk1.jpg' %}");  
+  background-repeat: no-repeat;
+  background-size: 100% 100%;  
+}    
+
+.logo {
+  float: left;
+}
+/* ~~ Top Navigation Bar ~~ */
+
+#navigation-container {
+  width: 1200px;
+  margin: 0 auto;
+  height: 70px;
+}
+
+.navigation-bar {
+  /*background-color: #8DB8C9;*/
+  height: 70px;
+  width: 100%;
+  text-align:left;
+}
+
+.navigation-bar ul {
+  padding: 4px;
+  margin: 0px;
+  text-align: left;
+  display:inline-block;
+  vertical-align:top;
+}
+
+.navigation-bar li {
+  list-style-type: none;
+  padding: 0px;
+  height: 24px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: inline;
+}
+
+.navigation-bar li a {
+  color: white;
+  font-size: 16px;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  line-height: 70px;
+  padding: 5px 15px;
+  opacity: 0.7;
+}
+
+#menu {
+  float: right;
+}
+* {
+   
+  box-sizing: border-box;
+}
+
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+} 
+form {
+    margin-top: 20px;
+    
+}     
+</style>
+  <div class="navigation-bar">
+    <div id="navigation-container">
+      <img class="logo" src="/static/images/logo.png" height="70" width="80">
+      <ul>
+        <li><a href="#">Machine Purchase</a></li>
+        <li><a href="#">Spare Parts</a></li>
+        <li><a href="#">Cartridge Purchase</a></li>
+        <li><a href="#">About Us</a></li>
+       </ul>
+    </div>       
+   </div>
+</head>
+{% block content %}
+<body> 
+<style>
+.container {
+  width: 700px;
+  margin-top: 100px;
+  margin-left: 280px; 
+    
+  /*border: 3px solid #343D50;*/
+  /*border-radius: 50px;*/
+  /*background-color: #414447;*/
+   
+    
+}    
+input[type=text], select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  float: left;
+  width: 25%;   
+  margin-top: 30px;
+  margin-left: 80px; 
+}
+
+input[type=text], textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  float: left;
+  width: 25%;   
+  margin-top: 30px;
+  margin-left: 80px; 
+}    
+
+    
+label {
+  color: white;
+  font-size: 15px;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  line-height: 30px; 
+  padding: 5px 15px;  
+  display: inline-block;
+  border: 3px solid #D7DBE5;  
+  border-radius: 20px;
+  float: left;
+  width: 25%; 
+  margin-top: 30px;
+  margin-left: 120px; 
+}
+
+input[type=submit] {
+  /*background-color: #8DB8C9;*/
+  background-color: Transparent;  
+  color: white;
+  font-size: 15px;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;  
+  padding: 12px 20px;
+  cursor: pointer;
+  border: 3px solid #D7DBE5;
+  border-radius: 20px;  
+  margin-top: 20px;
+  margin-left: 250px;
+  width: 25%; 
+  text-align: center;  
+  display: inline-block;  
+}    
+</style>
+    
+<div class = "container">
+  {% if result_list %}   
+  <form id = "solutionForm" action="." method="POST"> 
+      {% csrf_token %}
+  <div class="row">
+  <div class="col-25">
+      <label for="company">Company/Brand</label>
+    </div>    
+   <div class="col-75">
+       <select>
+
+{% for element in result_list %}
+
+
+<option value={{ element.company.company }}>{{ element.company }}
+
+{% endfor %}
+
+     </select>
+    </div>
+  </div>
+  <div class="row">
+      <div class="col-25">
+      <label for="printer">Type of Printer</label>
+    </div>
+    <div class="col-75">
+      <select>
+
+
+{% for element in result_list %}
+
+
+<option value={{ element.printer }}>{{ element.printer }}
+
+{% endfor %}
+
+     </select>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-25">
+      <label for="issue">Type of Issue</label>
+    </div>  
+    <div class="col-75">
+      <select>
+
+
+{% for element in result_list %}
+
+
+<option value={{ element.issue }}>{{ element.issue }}
+
+{% endfor %}
+
+     </select>
+
+    </div>
+  </div>
+    
+ <div id="outer">
+     <div class="inner">
+        <input type="submit" value="Submit" class="submit">
+     </div>
+  </div>
+      
+  </form>
+    
+   {% endif %}  
+</div>
+</body>
+{% endblock %}    
+</html>

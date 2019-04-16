@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<body>
+<style>
+.container {
+  width: 700px;
+  margin-top: 50px;
+  margin-left: 280px; 
+    
+  /*border: 3px solid #343D50;*/
+  /*border-radius: 50px;*/
+  /*background-color: #414447;*/
+   
+    
+}    
+input[type=text], textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  float: left;
+  width: 50%;   
+  margin-top: 5px;
+  margin-left: 20px; 
+}    
+
+    
+label {
+  color: white;
+  font-size: 15px;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  line-height: 30px; 
+  padding: 5px 15px;  
+  display: inline-block;
+  /*border: 3px solid #D7DBE5;*/ 
+  /*border-radius: 20px;*/
+  float: left;
+  width: 50%; 
+  margin-top: 5px;
+  margin-left: 20px; 
+}
+
+input[type=submit] {
+  /*background-color: #8DB8C9;*/
+  background-color: Transparent;  
+  color: white;
+  font-size: 15px;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;  
+  padding: 12px 20px;
+  cursor: pointer;
+  border: 3px solid #D7DBE5;
+  border-radius: 20px;  
+  margin-top: 20px;
+  margin-left: 250px;
+  width: 25%; 
+
+} 
+</style>    
+<div class = "container"> 
+  <form id = "paymentForm" action="." method="POST"> 
+      {% csrf_token %}
+  <div class="row">
+      <div class="col-25">
+          <label for="card">Name on the Card</label>
+      </div>
+  </div>
+  <div class="row">
+     <div class="col-25"> 
+         <textarea rows="1" cols="1000">
+         </textarea>
+      </div>    
+  </div>
+  <div class="row">
+      <div class="col-25">
+          <label for="card">Card Number</label>
+      </div>
+  </div>
+  <div class="row">
+     <div class="col-25"> 
+         <textarea rows="1" cols="1000">
+         </textarea>
+      </div>    
+  </div> 
+  <div class="row">
+      <div class="col-25">
+          <label for="card">Name on the Card</label>
+      </div>
+  </div>
+  <div class="row">
+     <div class="col-25"> 
+         <textarea rows="1" cols="1000">
+         </textarea>
+      </div>    
+  </div> 
+      
+  <div> 
+    <input type="submit" value="Pay Now" class="submit"> 
+  </div>      
+  </form> 
+</div>     
+</body>
+{% endblock %}
