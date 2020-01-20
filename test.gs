@@ -26,7 +26,7 @@ function main() {
     var spreadsheetUrl = queryObject.spreadsheetUrl;
     var tabName = queryObject.tabName;
     var reportVersion = queryObject.reportVersion;
-    //Logger.log(spreadsheetUrl + " " + query);
+    Logger.log(spreadsheetUrl + " " + query);
     var spreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
     var sheet = spreadsheet.getSheetByName(tabName);
     
