@@ -2,7 +2,7 @@ var QUERIES = [{'attributes' : 'CampaignId',
                 'metrics' : 'Clicks,Impressions',
                 'sourceReport' : 'CAMPAIGN_PERFORMANCE_REPORT',
                 'dateRange' : 'LAST_MONTH',
-                'spreadsheetUrl' : 'https://docs.google.com/spreadsheets/d/1FVhVzLhkqFPJcDmmTJaRDg2mDC0Vd4fO801Mw7I3T8A/edit?usp=sharing',
+                'spreadsheetUrl' : 'https://docs.google.com/spreadsheets/d/1CS5K0O_fH_s13klXRWVmjjV9l753UKi6k18o4yBzQfY/edit?usp=sharing',
                 'tabName' : 'report',
                 'reportVersion' : 'v201809 '
                }
