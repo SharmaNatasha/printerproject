@@ -1,7 +1,7 @@
 var QUERIES = [{'attributes' : 'CampaignId',
                 'metrics' : 'Clicks,Impressions',
                 'sourceReport' : 'CAMPAIGN_PERFORMANCE_REPORT',
-                'dateRange' : 'LAST_MONTH',
+                'dateRange' : 'ALL_TIME',
                 'spreadsheetUrl' : 'https://docs.google.com/spreadsheets/d/1CS5K0O_fH_s13klXRWVmjjV9l753UKi6k18o4yBzQfY/edit?usp=sharing',
                 'tabName' : 'report',
                 'reportVersion' : 'v201809 '
