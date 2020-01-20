@@ -1,157 +1,102 @@
-var QUERIES = [{'attributes' : 'CampaignId',
-                'metrics' : 'Clicks,Impressions',
-                'sourceReport' : 'CAMPAIGN_PERFORMANCE_REPORT',
-                'dateRange' : 'ALL_TIME',
-                'spreadsheetUrl' : 'https://docs.google.com/spreadsheets/d/1CS5K0O_fH_s13klXRWVmjjV9l753UKi6k18o4yBzQfY/edit?usp=sharing',
-                'tabName' : 'report',
-                'reportVersion' : 'v201809 '
-               }
-               
-              ];
-
-var USERDELIMITER = ".";
-
+var DEBUG = 0; // set to 1 to get more details about what the script does while it runs; default = 0
+var REPORT_SHEET_NAME = "report"; // the name of the tab where the report data should go
+var SETTINGS_SHEET_NAME = "settings"; // the name of the tab where the filters and date range are specified
+var SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1FVhVzLhkqFPJcDmmTJaRDg2mDC0Vd4fO801Mw7I3T8A/edit?usp=sharing"; // The URL to the Google spreadsheet with your report template
+var EMAIL_ADDRESSES = "nats.sha@gmail.com"; // Get notified by email at this address when a new report is ready
 
 function main() {
-  for(var i in QUERIES) {
-    var queryObject = QUERIES[i];
-    var attributes = queryObject.attributes.replace(/\s/g, '');
-    var attributeArray = attributes.split(",");
-    //var segments = queryObject.segments.replace(/\s/g, '');
-    //var segmentArray = segments.split(",");
-    var metrics = queryObject.metrics.replace(/\s/g, '');
-    var metricArray = metrics.split(",");
-    var sourceReport = queryObject.sourceReport;
-    var dateRange = queryObject.dateRange;
-    var spreadsheetUrl = queryObject.spreadsheetUrl;
-    var tabName = queryObject.tabName;
-    var reportVersion = queryObject.reportVersion;
-    Logger.log(spreadsheetUrl + " " + query);
-    var spreadsheet = SpreadsheetApp.openByUrl(spreadsheetUrl);
-    var sheet = spreadsheet.getSheetByName(tabName);
+  var currentSetting = new Object();
+  currentSetting.ss = SPREADSHEET_URL;
+  
+  // Read Settings Sheet
+  var settingsSheet = SpreadsheetApp.openByUrl(currentSetting.ss).getSheetByName(SETTINGS_SHEET_NAME);
+  var rows = settingsSheet.getDataRange();
+  var numRows = rows.getNumRows();
+  var numCols = rows.getNumColumns();
+  var values = rows.getValues();
+  var numSettingsRows = numRows - 1;
+  
+  var sortString = "";
+  var filters = new Array();
+  for(var i = 0; i < numRows; i++) {
+    var row = values[i];
+    var settingName = row[0];
+    var settingOperator = row[1];
+    var settingValue = row[2];
+    var dataType = row[3];
+    debug(settingName + " " + settingOperator + " " + settingValue);
     
-    var delimiter = "../|/..";
-    var map = new Array();
-    var segmentKeyList = new Array();
-    var query = "SELECT " + attributes + "," + metrics + " FROM " + sourceReport + " DURING " + dateRange;
-    
-    var report = AdWordsApp.report(query);
-    var rows = report.rows();
-    while(rows.hasNext()) {
-      var row = rows.next();
-      var pivotKey = "";
-      	
-      for(var i = 0; i < attributeArray.length; i++) {
-        var key = attributeArray[i];
-        //Logger.log(key);
-        var val = row[key];
-        //Logger.log(" " + val);
-        pivotKey += val + delimiter;
-      }
-      //Logger.log(pivotKey);
-      if(!map[pivotKey]) {
-        map[pivotKey] = new Array();
-      
-    }	
-      
-      
-      /*for(var i = 0; i < segmentArray.length; i++) {
-        var segmentKey = "";	
-        var key = segmentArray[i];
-          //Logger.log(key);
-        var val = row[key];
-        //Logger.log(" " + val);
-        */
-        for(var j = 0; j < metricArray.length; j++) {
-          var metricName = metricArray[j];
-          var metricValue = parseFloat(row[metricName]);
-          segmentKey = val + delimiter + metricName;
-          //Logger.log(" " + segmentKey);
-          
-          segmentKeyList[segmentKey] = 1;
-          if(!map[pivotKey][segmentKey]) {
-            map[pivotKey][segmentKey] = metricValue;
+    if(settingName.toLowerCase().indexOf("report type") != -1) {
+      var reportType = settingValue;
+    } else if(settingName.toLowerCase().indexOf("date range") != -1) {
+      var dateRange = settingValue;
+    } else if(settingName.toLowerCase().indexOf("sort order") != -1) {
+      var sortDirection = dataType || "DESC";
+      if(settingValue) var sortString = "ORDER BY " + settingValue + " " + sortDirection;
+      var sortColumnIndex = 1;
+    }else {
+      if(settingOperator && settingValue) {
+        if(dataType.toLowerCase().indexOf("long") != -1 || dataType.toLowerCase().indexOf("double") != -1 || dataType.toLowerCase().indexOf("money") != -1 || dataType.toLowerCase().indexOf("integer") != -1) {
+          var filter =  settingName + " " + settingOperator + " " + settingValue;
+        } else {
+          if(settingValue.indexOf("'") != -1) {
+            var filter =  settingName + " " + settingOperator + ' "' + settingValue + '"';
+          } else if(settingValue.indexOf("'") != -1) {
+            var filter =  settingName + " " + settingOperator + " '" + settingValue + "'";
           } else {
-            map[pivotKey][segmentKey] += metricValue;
+            var filter =  settingName + " " + settingOperator + " '" + settingValue + "'";
           }
-          //Logger.log("   " + metricValue);
-          
         }
-      //}
-      
-    }
-    
-   
-    var dataToWrite = new Array();
-    
-    var headerRow = attributeArray;
-    for(var segmentKey in segmentKeyList){
-      var cleanSegmentName = segmentKey.replace(delimiter,USERDELIMITER);
-      headerRow.push(cleanSegmentName);
-      //Logger.log(cleanSegmentName);
-    }
-    //Logger.log(headerRow);
-    
-    //dataToWrite.push(headerRow);
-    
-    for(pivotKey in map) {
-      var rowToWrite = new Array();
-      var row = map[pivotKey];
-      var pivotParts = pivotKey.split(delimiter);
-      var lastElement = pivotParts.pop();
-      //Logger.log(pivotParts);
-      var rowToWrite = rowToWrite.concat(pivotParts);
-      for(segmentKey in segmentKeyList) {
-        
-        var val = map[pivotKey][segmentKey];
-        if(!val) val = "";
-        //Logger.log(pivotKey);
-      	//Logger.log(" " + segmentKey + " : " + val);
-      	rowToWrite.push(val);
+        debug("filter: " + filter)
+        filters.push(filter);
       }
-      //Logger.log(rowToWrite);
-      dataToWrite.push(rowToWrite);
     }
-    //Logger.log("");
-    //Logger.log(dataToWrite);
-    var amountOfDataWritten = writeDataToGoogleSheet(dataToWrite, sheet, headerRow, 1);
-    if(amountOfDataWritten) Logger.log(amountOfDataWritten + " rows of data written to " + spreadsheetUrl);
-    
   }
   
   
-  // FUNCTION: writeDataToGoogleSheet
-	function writeDataToGoogleSheet(data, sheet, columnsUsedArray, overwrite) {
+  // Process the report sheet and fill in the data
+  var reportSheet = SpreadsheetApp.openByUrl(currentSetting.ss).getSheetByName(REPORT_SHEET_NAME);
+  var rows = reportSheet.getDataRange();
+  var numRows = rows.getNumRows();
+  var numCols = rows.getNumColumns();
+  var values = rows.getValues();
+  var numSettingsRows = numRows - 1;
+  
+  // Read Header Row and match names to settings
+  var headerNames = new Array();
+  var row = values[0];
+  for(var i = 0; i < numCols; i++) {
+    var value = row[i];
+    headerNames.push(value);
+    //debug(value);
+  } 
   
   
   
-      // Write Header
-      if(overwrite) {
-        sheet.clear();
-        var toWrite = new Array();
-        toWrite.push(columnsUsedArray);
-        //Logger.log (toWrite);
-        var range = sheet.getRange(1, 1, toWrite.length, toWrite[0].length);
-        range.setValues(toWrite);
-      }
-      
-      //var dataAdded = 1;
-      if(!overwrite) {
-        var startRow = sheet.getLastRow();
-        var startColumn = 0; //sheet.getLastColumn();
-      } else {
-        var startRow = 1; // accounts for 1 row of headers
-        var startColumn = 0;
-      }
-      var maxRows = sheet.getMaxRows();
-      var maxColumns = sheet.getMaxColumns();
-      Logger.log("startRow: " + startRow + " startColumn: " + startColumn + " dataToWrite.length: " + data.length + " dataToWrite[0].length: " + data[0].length);
-      //var range = sheet.getRange(startRow+1, startColumn+1, 20, 20);
-      //range.setValues(data);
-      var amountWritten = data.length;
-      return(amountWritten); 
-      
-      
-    } 
-  
+  if(reportType.toLowerCase().indexOf("performance") != -1) {
+    var dateString = ' DURING ' + dateRange;
+  } else {
+    var dateString = "";
+  }
+  if(filters.length) {
+    var query = 'SELECT ' + headerNames.join(",") + ' FROM ' + reportType + ' WHERE ' + filters.join(" AND ") + dateString + " " + sortString;
+  } else {
+    var query = 'SELECT ' + headerNames.join(",") + ' FROM ' + reportType + dateString + " " + sortString;
+  }
+  debug(query);
+  var report = AdWordsApp.report(query);
+  try {
+    report.exportToSheet(reportSheet);
+    var subject = "Your " + reportType + " for " + dateRange + " for " + AdWordsApp.currentAccount().getName() + " is ready";
+    var body = "currentSetting.ss<br>Find your attached report";
+    MailApp.sendEmail(EMAIL_ADDRESSES, subject, body);
+    Logger.log("Your report is ready at " + currentSetting.ss);
+  } catch (e) {
+    debug("error: " + e);
+  }
+
+}
+
+function debug(text) {
+  if(DEBUG) Logger.log(text);
 }
